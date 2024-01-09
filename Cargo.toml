@@ -8,4 +8,6 @@ name = "udf"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.19.0"
+arrow = { version = "49.0.0", features = ["pyarrow"] }
+eyre = "0.6.11"
+pyo3 = { version = "0.20.0", features = ["eyre"] }

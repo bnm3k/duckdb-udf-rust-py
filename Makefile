@@ -1,15 +1,16 @@
 .SILENT:
-.DEFAULT_GOAL:=run
+.DEFAULT_GOAL:=dev
 SHELL:=/usr/bin/bash
 
-.PHONY: run clean build
+.PHONY: dev clean build
 
 # for dev only
-run:
-	python usage.py
+dev: .dev
+	python example.py
 
-build:
+.dev: $(shell find src -type f)
 	maturin develop
+	touch .dev
 
 clean:
-	echo 'nothing to clean yet'
+	rm .build
