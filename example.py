@@ -5,9 +5,11 @@ import pyarrow as pa
 
 
 def main():
-    some_list = pa.array((i for i in range(3)), type=pa.uint8())
-    got = udf.echo_array(some_list)
-    print(got)
+    strs = ["foo", "bar", None, "barx"]
+    str_arr = pa.array(strs, type=pa.string())
+    lengths_arr = udf.get_str_len(str_arr)
+    for (s, l) in zip(str_arr, lengths_arr):
+        print(f"{s}->{l}")
 
 
 if __name__ == "__main__":
