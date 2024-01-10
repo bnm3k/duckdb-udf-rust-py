@@ -13,25 +13,21 @@ def my_str_len_udf(x: pa.lib.ChunkedArray):
 
 def main():
     # register UDF
-    def _my_str_len(ctx, x: pa.lib.StringArray):
-        return udf.get_str_len(x)
-        # return pa.array((len(str(s)) for s in x), type=pa.uint32())
+    # def _my_str_len(ctx, x: pa.lib.StringArray):
+    #     return udf.get_str_len(x)
 
     pc.register_vector_function(
-        _my_str_len,
+        lambda ctx, x: udf.get_str_len(x),  # function
         "my_str_len",  # name
-        {
+        {  # doc
             "summary": "gets string length",
             "description": "Given a string 'x' returns the length of x",
         },
         {
-            "x": pa.string(),
+            "x": pa.string(),  # input
         },
         pa.uint32(),
     )
-
-    # res = pc.call_function("my_str_len", [pa.array(["foo", "bar", "quz"])])
-    # print(res)
 
     # in memory database
     with duckdb.connect(":memory:") as conn:
@@ -39,13 +35,13 @@ def main():
             "my_str_len", my_str_len_udf, [t.VARCHAR], t.UINTEGER, type="arrow"
         )
         conn.sql("create table test(s varchar)")
-        conn.sql("insert into test values ('foo'),('bar'), (NULL), ('barx')")
+        conn.sql("insert into test select range::varchar from range(0,2000000)")
         res = conn.sql("select s, my_str_len(s) as l  from test")
         print(res)
-        # str_arr = pa.array(str_chunks)
-        # lengths_arr = udf.get_str_len(str_arr)
-        # for (s, l) in zip(str_arr, lengths_arr):
-        #     print(f"{s}->{l}")
+
+        # tbl = conn.sql("select s from test").arrow()
+        # reader: pa.lib.RecordBatchReader = tbl.to_reader()
+        # udf.read_pyarrow_table(reader)
 
 
 if __name__ == "__main__":

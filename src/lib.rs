@@ -33,12 +33,24 @@ fn get_str_len<'a>(py: Python, a: &PyAny) -> Result<Py<PyAny>> {
         .context("Could not convert to pyarrow")
 }
 
+#[pyfunction]
+fn read_pyarrow_table<'a>(_py: Python, a: &PyAny) {
+    // a: pyarrow.lib.RecordBatchReader
+    // let arraydata = arrow::array::ArrayData::from_pyarrow(a).unwrap();
+    let reader = arrow::ffi_stream::ArrowArrayStreamReader::from_pyarrow(a).unwrap();
+    for chunk in reader {
+        let batch = chunk.expect("Should be valid RecordBatch");
+        println!("row: {:?}", batch.num_rows());
+    }
+}
+
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
 /// import the module.
 #[pymodule]
 fn udf(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_str_len, m)?)?;
+    m.add_function(wrap_pyfunction!(read_pyarrow_table, m)?)?;
 
     Ok(())
 }
