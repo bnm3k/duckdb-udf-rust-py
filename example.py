@@ -7,14 +7,15 @@ import duckdb
 import duckdb.typing as t
 
 
-def my_str_len_udf(x):
+def my_str_len_udf(x: pa.lib.ChunkedArray):
     return pc.call_function("my_str_len", [x])
 
 
 def main():
     # register UDF
-    def _my_str_len(ctx, x):
-        return pa.array((len(str(s)) for s in x), type=pa.uint32())
+    def _my_str_len(ctx, x: pa.lib.StringArray):
+        return udf.get_str_len(x)
+        # return pa.array((len(str(s)) for s in x), type=pa.uint32())
 
     pc.register_vector_function(
         _my_str_len,
