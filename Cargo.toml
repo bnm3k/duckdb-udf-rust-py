@@ -2,10 +2,15 @@
 name = "udf"
 version = "0.1.0"
 edition = "2021"
+default-run = "dev"
 
 [lib]
 name = "udf"
 crate-type = ["cdylib"]
+
+[[bin]]
+name = "dev"
+path = "src/bin/main.rs"
 
 [dependencies]
 arrow = { version = "49.0.0", features = ["pyarrow"] }
